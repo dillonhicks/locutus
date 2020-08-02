@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "locutus-client",
+    "locutus-server",
+    "locutus-game-of-life",
+    "locutus-actor",
+]

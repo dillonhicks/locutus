@@ -1,0 +1,18 @@
+[package]
+name = "locutus-actor"
+version = "0.1.0"
+authors = ["Dillon Hicks <dillon@dillonhicks.io>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "^1.0"
+serde1 = { package = "serde", version = "^1.0", features = ["derive"], optional = true}
+uuid1 = { package = "uuid", version = "^0.8", features = ["v4"], optional = true}
+
+[features]
+
+default = ["serde", "uuid"]
+serde = ["serde1"]
+uuid = ["uuid1"]

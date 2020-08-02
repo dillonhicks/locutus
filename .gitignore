@@ -1,0 +1,7 @@
+target/
+*~
+.idea/
+Cargo.lock
+wasm.js
+wasm_bg.wasm
+.DS_Store
