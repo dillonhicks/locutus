@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -exo pipefail
 
-cargo build -p locutus-server
-cargo run -p locutus-server -- \
+cargo build -p locutus-server --release
+cargo run -p locutus-server --release -- \
       --log-level info \
       --host 127.0.0.1 \
       --port 9001 \

@@ -2,16 +2,35 @@
 
 use crate::deps::{
     anyhow::Error,
-    serde::{Deserialize, Serialize},
+    serde::{
+        Deserialize,
+        Serialize,
+    },
     yew::{
-        format::{Json, Nothing, Toml},
+        format::{
+            Json,
+            Nothing,
+            Toml,
+        },
         html,
         prelude::*,
         services::{
-            fetch::{FetchService, FetchTask, Request, Response},
-            websocket::{WebSocketService, WebSocketStatus, WebSocketTask},
+            fetch::{
+                FetchService,
+                FetchTask,
+                Request,
+                Response,
+            },
+            websocket::{
+                WebSocketService,
+                WebSocketStatus,
+                WebSocketTask,
+            },
         },
-        Component, ComponentLink, Html, ShouldRender,
+        Component,
+        ComponentLink,
+        Html,
+        ShouldRender,
     },
 };
 
@@ -20,9 +39,12 @@ mod gameoflife_client;
 pub(crate) mod deps {
     pub use anyhow;
     pub use bincode;
+    pub use js_sys;
     pub use locutus_game_of_life as gameoflife;
     pub use serde;
     pub use serde_json;
+    pub use wasm_bindgen;
+    pub use web_sys;
     pub use yew;
 }
 use self::gameoflife_client::GameOfLifeClient;
@@ -52,7 +74,7 @@ impl Component for Model {
 
     fn update(
         &mut self,
-        msg: Self::Message,
+        _msg: Self::Message,
     ) -> ShouldRender {
         true
     }
@@ -65,7 +87,7 @@ impl Component for Model {
     }
 
     fn view(&self) -> Html {
-        let controller = || {
+        let client = || {
             html! {
                     <GameOfLifeClient />
 
@@ -73,9 +95,9 @@ impl Component for Model {
         };
 
         html! {
-            <div>
-            { controller() }
-            </div>
+            <div>         { client() } </div>
+
+
         }
     }
 }

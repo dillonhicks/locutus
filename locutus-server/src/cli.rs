@@ -1,5 +1,7 @@
-use crate::deps::structopt::StructOpt;
-use crate::deps::tracing::Level;
+use crate::deps::{
+    structopt::StructOpt,
+    tracing::Level,
+};
 
 use std::net::IpAddr;
 

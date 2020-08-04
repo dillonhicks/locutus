@@ -1,19 +1,28 @@
 use crate::deps::{
-    crossbeam::channel::{self, Receiver, Sender},
+    crossbeam::channel::{
+        self,
+        Receiver,
+        Sender,
+    },
     gameoflife,
-    locutus_actor::{self as actor, Actor},
-    parking_lot::{Mutex, MutexGuard},
+    locutus_actor::{
+        self as actor,
+        Actor,
+    },
+    parking_lot::{
+        Mutex,
+        MutexGuard,
+    },
     serde,
     tracing::info,
 };
 use std::fmt;
-use std::{sync::Arc, time::Duration};
 
 pub struct GameOfLife {
-    id: actor::Id,
+    id:   actor::Id,
     game: Mutex<gameoflife::Simulation>,
-    tx: Sender<gameoflife::Message>,
-    rx: Receiver<gameoflife::Message>,
+    tx:   Sender<gameoflife::Message>,
+    rx:   Receiver<gameoflife::Message>,
 }
 
 impl GameOfLife {
@@ -38,14 +47,14 @@ impl<'a> Actor<'a> for GameOfLife {
     ) -> Result<(), Box<dyn actor::Error>> {
         self.tx
             .send(message)
-            .map_err(|err| gameoflife::Error::Unknown)
+            .map_err(|_err| gameoflife::Error::Unknown)
             .map_err(|err| err.into())
     }
 
     fn on_tick(&self) -> Result<(), Box<dyn actor::Error>> {
         self.rx
             .recv()
-            .map_err(|err| gameoflife::Error::Unknown)
+            .map_err(|_err| gameoflife::Error::Unknown)
             .and_then(|msg| self.game.lock().update(msg))
             .map_err(|err| err.into())
     }

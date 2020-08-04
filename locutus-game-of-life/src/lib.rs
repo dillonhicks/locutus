@@ -1,8 +1,10 @@
-use std::time::Duration;
-
 use crate::deps::{
-    rand::{thread_rng, Rng},
-    serde, thiserror,
+    rand::{
+        thread_rng,
+        Rng,
+    },
+    serde,
+    thiserror,
     tracing::info,
 };
 
@@ -117,7 +119,10 @@ impl State {
                 *self = next;
             }
             (Running, Starting) | (Pausing, Starting) | (Ended, Starting) | (Ended, Running) | (Ended, Pausing) => {
-                return Err(Error::StateTransition { from: *self, to: next });
+                return Err(Error::StateTransition {
+                    from: *self,
+                    to:   next,
+                });
             }
         }
 
@@ -161,6 +166,16 @@ impl State {
             true
         } else {
             false
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        use State::*;
+        match self {
+            Starting => "starting",
+            Running => "running",
+            Pausing => "pausing",
+            Ended => "ended",
         }
     }
 }
@@ -221,31 +236,38 @@ impl Cellule {
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct Simulation {
-    state: State,
-    ticks: usize,
-    cellules: Vec<Cellule>,
-    cellules_width: usize,
+    state:           State,
+    ticks:           usize,
+    cellules:        Vec<Cellule>,
+    cellules_width:  usize,
     cellules_height: usize,
 }
 
 impl Simulation {
+    const HEIGHT: usize = 60;
+    const WIDTH: usize = 80;
+
     pub fn new() -> Self {
         Self {
-            state: State::default(),
-            ticks: 0,
-            cellules: vec![
+            state:           State::default(),
+            ticks:           0,
+            cellules:        vec![
                 Cellule {
                     life_state: LifeState::Dead,
                 };
-                53 * 40
+                Self::WIDTH * Self::HEIGHT
             ],
-            cellules_width: 53,
-            cellules_height: 40,
+            cellules_width:  Self::WIDTH,
+            cellules_height: Self::HEIGHT,
         }
     }
 
     pub fn ticks(&self) -> usize {
         self.ticks
+    }
+
+    pub fn state(&self) -> State {
+        self.state
     }
 
     pub fn cellules(&self) -> &[Cellule] {
@@ -391,7 +413,11 @@ impl fmt::Display for Simulation {
     ) -> fmt::Result {
         for line in self.cellules.as_slice().chunks(self.width()) {
             for &cell in line {
-                let symbol = if cell.alive() { '◼' } else { '◻' };
+                let symbol = if cell.alive() {
+                    '◼'
+                } else {
+                    '◻'
+                };
                 write!(f, "{}", symbol)?;
             }
             write!(f, "\n")?;

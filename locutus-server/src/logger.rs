@@ -1,5 +1,4 @@
 use crate::deps::tracing::Level;
-use std::str::FromStr;
 
 pub fn try_initialize(log_level: Option<Level>) -> Result<(), Box<dyn std::error::Error>> {
     let log_level = log_level.unwrap_or(Level::INFO);

@@ -13,9 +13,7 @@ repositories.
 * **locutus-actor:** Traits for defining an "Actor" that receives messages and updates when a `fn tick()` is called.
 * **locutus-game-of-life:** The simulation logic for game of life pared down from the yew/examples/game_of_life  
 * **locutus-client:** The WASM client app to create a websocket connection to a locutus-server, starting a simulation, 
-   and "rendering" updates as state changes are pushed through the websocket. Rendering of the cells is still like the
-   original yew demo which uses unicode block characters to present the universe. In the future, this will be replaced
-   with drawing to a canvas.
+   and rendering updates as state changes are pushed through the websocket.
 * **locutus-server:** The websocket server for running game of life instances. The server uses a hybrid threading model 
   for efficiency. The server uses cooperative async tasks for handling connections, and a dedicated thread pool for 
   running instances of GameOfLife actors.

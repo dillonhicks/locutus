@@ -1,25 +1,49 @@
-use std::net::{IpAddr, SocketAddr};
-use std::thread::spawn;
-use std::{sync::Arc, time::Duration};
-
-use tungstenite::server::accept;
-
-use crate::actors::{self, GameOfLife};
-use crate::deps::futures_util::{
-    future::{select, Either},
-    SinkExt, StreamExt,
+use std::net::{
+    IpAddr,
+    SocketAddr,
 };
-use crate::deps::rayon::{ThreadPool, ThreadPoolBuilder};
-use crate::deps::tokio::net::{TcpListener, TcpStream};
-use crate::deps::tokio_tungstenite::{accept_async, tungstenite::Error, WebSocketStream};
-use crate::deps::tungstenite::Result;
-use crate::deps::tungstenite::{Message, WebSocket};
+
+use std::{
+    sync::Arc,
+    time::Duration,
+};
+
+use crate::{
+    actors::{
+        self,
+        GameOfLife,
+    },
+    deps::{
+        futures_util::{
+            future::{
+                select,
+                Either,
+            },
+            SinkExt,
+            StreamExt,
+        },
+        rayon::{
+            ThreadPool,
+            ThreadPoolBuilder,
+        },
+        tokio::net::TcpStream,
+        tokio_tungstenite::WebSocketStream,
+    },
+};
+
 use crate::deps::{
     crossbeam::channel,
     gameoflife,
     locutus_actor::Actor,
     serde_json as json,
-    tracing::{error, info, trace, warn, Level},
+    tracing::{
+        error,
+        info,
+        trace,
+        warn,
+        Level,
+    },
+    tungstenite::Message,
 };
 
 macro_rules! panic_on_err {
@@ -47,21 +71,21 @@ macro_rules! panic_on_err {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Config {
-    pub ip: IpAddr,
-    pub port: u16,
-    pub sim_threads: usize,
+    pub ip:                    IpAddr,
+    pub port:                  u16,
+    pub sim_threads:           usize,
     pub sim_thread_stack_size: usize,
-    pub tick: Duration,
+    pub tick:                  Duration,
 }
 
 impl std::default::Default for Config {
     fn default() -> Self {
         Self {
-            ip: IpAddr::from([127, 0, 0, 1]),
-            port: 9001,
-            sim_threads: 16,
+            ip:                    IpAddr::from([127, 0, 0, 1]),
+            port:                  9001,
+            sim_threads:           16,
             sim_thread_stack_size: 2 << 20,
-            tick: Duration::from_millis(33),
+            tick:                  Duration::from_millis(33),
         }
     }
 }
@@ -70,7 +94,7 @@ impl std::default::Default for Config {
 pub async fn serve(config: Config) -> std::result::Result<(), Box<dyn std::error::Error>> {
     use crate::deps::tokio::net::TcpListener;
 
-    let mut sim_thread_pool = Arc::new(
+    let sim_thread_pool = Arc::new(
         ThreadPoolBuilder::new()
             .num_threads(config.sim_threads)
             .stack_size(config.sim_thread_stack_size)
@@ -140,8 +164,15 @@ async fn accept_connection(
     ));
 }
 
+fn nano_now() -> u64 {
+    ::std::time::SystemTime::now()
+        .duration_since(::std::time::UNIX_EPOCH)
+        .unwrap_or_else(|_| panic!())
+        .as_nanos() as u64
+}
+
 async fn handle_connection(
-    mut websocket: WebSocketStream<TcpStream>,
+    websocket: WebSocketStream<TcpStream>,
     actor: Arc<actors::GameOfLife>,
     tick: Duration,
 ) -> std::result::Result<(), Box<dyn std::error::Error>> {
@@ -198,6 +229,8 @@ fn run_actor(
     let mut frames = 0;
     info!("starting new actor: GameOfLife::{}", actor.id());
     let ticker = channel::tick(tick);
+
+    let mut start = nano_now();
     'update_loop: while let Ok(_tick) = ticker.recv() {
         actor.send(gameoflife::Message::Tick);
 
@@ -207,7 +240,13 @@ fn run_actor(
         }
         frames += 1;
         if frames % 120 == 0 {
-            info!("simulated {} frames", frames);
+            let now = nano_now();
+            info!(
+                "simulated {:>5} frames ({:.1} fps)",
+                frames,
+                120_000.0f64 / Duration::from_nanos(now - start).as_millis() as f64
+            );
+            start = now;
         }
     }
     info!("terminating actor: GameOfLife::{}", actor.id());

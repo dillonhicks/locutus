@@ -22,9 +22,6 @@ mod cli;
 mod logger;
 mod server;
 
-use std::net::IpAddr;
-use std::net::SocketAddr;
-
 #[tokio::main]
 async fn main() {
     use crate::deps::structopt::StructOpt;
@@ -34,7 +31,7 @@ async fn main() {
     let mut config = crate::server::Config::default();
     config.ip = args.host;
     config.port = args.port;
-    config.tick = std::time::Duration::from_millis((1000 / args.tick_hertz));
+    config.tick = std::time::Duration::from_millis(1000 / args.tick_hertz);
     config.sim_threads = args.sim_threads;
 
     crate::server::serve(config).await.expect("failed to run server");

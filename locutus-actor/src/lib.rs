@@ -9,7 +9,7 @@ pub(crate) mod deps {
 use std::fmt;
 
 #[cfg(feature = "serde")]
-use crate::deps::serde::{Deserialize, Serialize};
+use crate::deps::serde::Serialize;
 
 pub trait Error: std::error::Error {
     fn recoverable(&self) -> bool;
